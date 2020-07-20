@@ -1,0 +1,14 @@
+[Unit]
+Description=Supertuxkart Server
+After=network.target
+
+[Service]
+Type=simple
+User=supertuxkart
+Group=supertuxkart
+WorkingDirectory=/home/supertuxkart
+ExecStart=/usr/local/bin/supertuxkart --server-config=/etc/supertuxkart/supertuxkart.xml
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

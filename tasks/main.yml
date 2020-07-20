@@ -1,0 +1,82 @@
+---
+# tasks file for supertuxkart
+
+- name: Upgrade all packages to the latest version
+  apt:
+    name: "*"
+    state: latest
+
+- name: Install required packages
+  apt:
+    name: [
+      'git', 'subversion', 'build-essential', 'cmake',
+      'libbluetooth-dev', 'libsdl2-dev', 'libcurl4-openssl-dev',
+      'libenet-dev', 'libfreetype6-dev', 'libharfbuzz-dev',
+      'libfribidi-dev', 'libgl1-mesa-dev', 'libglew-dev',
+      'libjpeg-dev', 'libogg-dev', 'libopenal-dev', 'libpng-dev',
+      'libssl-dev', 'libvorbis-dev', 'libxrandr-dev', 'libx11-dev',
+      'nettle-dev', 'pkg-config', 'zlib1g-dev'
+    ]
+    state: present
+
+- name: Add group "supertuxkart"
+  group: name=supertuxkart
+
+- name: Add user "supertuxkart"
+  user: name=supertuxkart group=supertuxkart
+
+- name: Get core sources from Github
+  git:
+    repo: 'https://github.com/supertuxkart/stk-code'
+    dest: /home/supertuxkart/stk-code
+
+- name: Get assets using svn
+  subversion:
+    repo: https://svn.code.sf.net/p/supertuxkart/code/stk-assets
+    dest: /home/supertuxkart/stk-assets
+
+- name: Create build directory
+  file:
+    path: /home/supertuxkart/stk-code/cmake_build
+    owner: root
+    group: root
+    state: directory
+    mode: '0755'
+
+- name: Prepare build using Cmake
+  command: cmake -S /home/supertuxkart/stk-code -B /home/supertuxkart/stk-code/cmake_build -DSERVER_ONLY=ON
+
+- name: Build the default target for supertuxkart
+  make:
+    chdir: /home/supertuxkart/stk-code/cmake_build
+
+- name: Run 'install' target
+  make:
+    chdir: /home/supertuxkart/stk-code/cmake_build
+    target: install
+
+- name: Create the configuration directory
+  file:
+    path: /etc/supertuxkart/
+    owner: root
+    group: root
+    state: directory
+    mode: '0755'
+
+- name: Copy configuration file
+  template:
+    src: supertuxkart.xml
+    dest: /etc/supertuxkart/
+
+- name: Copy unit file
+  template:
+    src: supertuxkart.service
+    dest: /etc/systemd/system/supertuxkart.service
+    mode: 0644
+
+- name: Start Supertuxkart service
+  systemd:
+    name: supertuxkart.service
+    state: restarted
+    enabled: yes
+    daemon_reload: yes

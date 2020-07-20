@@ -1,0 +1,23 @@
+galaxy_info:
+  author: Nautik
+  role_name: supertuxkart
+  description: This role helps installing a Supertuxkart server.
+
+  license: MIT
+
+  min_ansible_version: 2.9
+
+  platforms:
+  - name: Debian
+    versions:
+    - all
+  - name: Ubuntu
+    versions:
+    - all
+
+  galaxy_tags:
+    - supertuxkart
+    - gaming
+    - game
+  
+  dependencies: []
